@@ -431,7 +431,7 @@
     <div id="quiz-page" class="hidden">
      <header class="page-header">
       <h1 id="quiz-page-title">測驗一</h1>
-      <p>共50題，請仔細作答</p>
+      <p id="quiz-subtitle">共30題，請仔細作答</p>
      </header>
      <form id="quiz-form"></form>
      <div class="submit-section"><button type="button" class="back-btn" id="back-to-home">返回首頁</button> <button type="button" id="submit-btn" class="submit-btn">提交答案</button>
@@ -457,116 +457,112 @@
         let userAnswers = {};
         let submitted = false;
 
-        // 生成50題測驗資料
-        function generateQuizQuestions(quizNum) {
-            const questions = [];
-            const grammarPatterns = [
-                { 
-                    q: "彼は仕事が忙しいにも＿＿＿、毎日運動している。", 
-                    options: ["かかわらず", "対して", "関して", "ついて"], 
-                    answer: 0,
-                    explanation: "「〜にもかかわらず」は逆接の表現で、前の状況があるのに、それとは反対のことが起こることを表します。",
-                    detail: "意味：〜だが、〜けれども（逆接）。書き言葉でよく使われる表現です。",
-                    example: "例：雨にもかかわらず、試合は予定通り行われた。"
-                },
-                { 
-                    q: "会議は3時間＿＿＿及んだ。", 
-                    options: ["に", "を", "で", "が"], 
-                    answer: 0,
-                    explanation: "「〜に及ぶ」は「〜まで達する」という意味で、時間や範囲を表すときに使います。",
-                    detail: "「に及ぶ」は数量や程度が予想以上に大きいことを表す表現です。",
-                    example: "例：被害は広い範囲に及んだ。"
-                },
-                { 
-                    q: "今日は雨が降り＿＿＿だ。", 
-                    options: ["そう", "よう", "らしい", "みたい"], 
-                    answer: 0,
-                    explanation: "「降りそうだ」は様態を表し、今にも雨が降りそうな状況を表します。動詞ます形＋そうだ。",
-                    detail: "「〜そうだ」は見た目や状況から判断した推測を表します。",
-                    example: "例：このケーキは美味しそうだ。"
-                },
-                { 
-                    q: "彼女は優しい＿＿＿頭もいい。", 
-                    options: ["ばかりか", "うえに", "ものの", "わりに"], 
-                    answer: 1,
-                    explanation: "「〜うえに」は「〜に加えて」という意味で、良いことを重ねて述べるときに使います。",
-                    detail: "前の事柄に、さらに別の事柄を付け加える表現です。プラスの内容にもマイナスの内容にも使えます。",
-                    example: "例：この店は安いうえに、美味しい。"
-                },
-                { 
-                    q: "時間がない＿＿＿、お金もない。", 
-                    options: ["うえに", "ばかりか", "のみならず", "すべて正解"], 
-                    answer: 3,
-                    explanation: "「うえに」「ばかりか」「のみならず」はすべて「さらに〜も」という意味で使えます。",
-                    detail: "3つとも追加の情報を述べる表現ですが、「のみならず」は書き言葉でよく使われます。",
-                    example: "例：彼は日本語のみならず、中国語も話せる。"
-                },
-                { 
-                    q: "この問題は簡単＿＿＿見えて、実は難しい。", 
-                    options: ["そうに", "ように", "に", "で"], 
-                    answer: 0,
-                    explanation: "「〜そうに見えて」は外見や印象を表す表現です。形容詞語幹＋そうに見えて。",
-                    detail: "見た目の印象と実際が異なることを述べる表現で、後ろには逆接的な内容が続きます。",
-                    example: "例：彼は真面目そうに見えて、実は遊び好きだ。"
-                },
-                { 
-                    q: "彼は医者である＿＿＿、作家でもある。", 
-                    options: ["とともに", "ばかりか", "と同時に", "すべて正解"], 
-                    answer: 3,
-                    explanation: "「とともに」「ばかりか」「と同時に」はすべて複数の役割を表すことができます。",
-                    detail: "複数の立場や状態が同時に成り立つことを表現する文法です。",
-                    example: "例：彼女は教師であるとともに、母親でもある。"
-                },
-                { 
-                    q: "風邪を引いた＿＿＿、会社を休んだ。", 
-                    options: ["ため", "ので", "から", "すべて正解"], 
-                    answer: 3,
-                    explanation: "「ため」「ので」「から」はすべて理由を表す接続表現として使えます。",
-                    detail: "「ため」は書き言葉、「ので」は丁寧、「から」は口語的な表現です。",
-                    example: "例：雨が降ったため、試合は中止になった。"
-                },
-                { 
-                    q: "試験に合格する＿＿＿、毎日勉強している。", 
-                    options: ["ために", "ように", "ことに", "もの"], 
-                    answer: 0,
-                    explanation: "「〜ために」は目的を表す表現です。意志動詞＋ために。",
-                    detail: "「ために」は目的、「ように」は無意志動詞や可能形と一緒に使います。",
-                    example: "例：家を買うために、貯金している。"
-                },
-                { 
-                    q: "彼は日本人＿＿＿漢字が読めない。", 
-                    options: ["のに", "けれど", "が", "すべて正解"], 
-                    answer: 3,
-                    explanation: "「のに」「けれど」「が」はすべて逆接を表す接続表現として使えます。",
-                    detail: "「のに」は意外な気持ちが強く、「けれど」「が」は中立的な逆接です。",
-                    example: "例：高いのに、あまり美味しくない。"
-                }
-            ];
-            
-            for (let i = 0; i < 50; i++) {
-                const pattern = grammarPatterns[i % 10];
-                questions.push({
-                    q: pattern.q,
-                    options: pattern.options,
-                    answer: pattern.answer,
-                    explanation: pattern.explanation,
-                    detail: pattern.detail,
-                    example: pattern.example
-                });
-            }
-            return questions;
-        }
+        // 測驗1的30題（N2文法：逆接、條件、因果關係）
+        const quiz1Questions = [
+            { q: "彼は仕事が忙しいにも＿＿＿、毎日運動している。", options: ["かかわらず", "対して", "関して", "ついて"], answer: 0, explanation: "「〜にもかかわらず」は逆接の表現で、前の状況があるのに、それとは反対のことが起こることを表します。", detail: "意味：〜だが、〜けれども（逆接）。書き言葉でよく使われる表現です。", example: "例：雨にもかかわらず、試合は予定通り行われた。" },
+            { q: "会議は3時間＿＿＿及んだ。", options: ["に", "を", "で", "が"], answer: 0, explanation: "「〜に及ぶ」は「〜まで達する」という意味で、時間や範囲を表すときに使います。", detail: "「に及ぶ」は数量や程度が予想以上に大きいことを表す表現です。", example: "例：被害は広い範囲に及んだ。" },
+            { q: "今日は雨が降り＿＿＿だ。", options: ["そう", "よう", "らしい", "みたい"], answer: 0, explanation: "「降りそうだ」は様態を表し、今にも雨が降りそうな状況を表します。動詞ます形＋そうだ。", detail: "「〜そうだ」は見た目や状況から判断した推測を表します。", example: "例：このケーキは美味しそうだ。" },
+            { q: "彼女は優しい＿＿＿頭もいい。", options: ["ばかりか", "うえに", "ものの", "わりに"], answer: 1, explanation: "「〜うえに」は「〜に加えて」という意味で、良いことを重ねて述べるときに使います。", detail: "前の事柄に、さらに別の事柄を付け加える表現です。プラスの内容にもマイナスの内容にも使えます。", example: "例：この店は安いうえに、美味しい。" },
+            { q: "時間がない＿＿＿、お金もない。", options: ["うえに", "ばかりか", "のみならず", "すべて正解"], answer: 3, explanation: "「うえに」「ばかりか」「のみならず」はすべて「さらに〜も」という意味で使えます。", detail: "3つとも追加の情報を述べる表現ですが、「のみならず」は書き言葉でよく使われます。", example: "例：彼は日本語のみならず、中国語も話せる。" },
+            { q: "この問題は簡単＿＿＿見えて、実は難しい。", options: ["そうに", "ように", "に", "で"], answer: 0, explanation: "「〜そうに見えて」は外見や印象を表す表現です。形容詞語幹＋そうに見えて。", detail: "見た目の印象と実際が異なることを述べる表現で、後ろには逆接的な内容が続きます。", example: "例：彼は真面目そうに見えて、実は遊び好きだ。" },
+            { q: "彼は医者である＿＿＿、作家でもある。", options: ["とともに", "ばかりか", "と同時に", "すべて正解"], answer: 3, explanation: "「とともに」「ばかりか」「と同時に」はすべて複数の役割を表すことができます。", detail: "複数の立場や状態が同時に成り立つことを表現する文法です。", example: "例：彼女は教師であるとともに、母親でもある。" },
+            { q: "風邪を引いた＿＿＿、会社を休んだ。", options: ["ため", "ので", "から", "すべて正解"], answer: 3, explanation: "「ため」「ので」「から」はすべて理由を表す接続表現として使えます。", detail: "「ため」は書き言葉、「ので」は丁寧、「から」は口語的な表現です。", example: "例：雨が降ったため、試合は中止になった。" },
+            { q: "試験に合格する＿＿＿、毎日勉強している。", options: ["ために", "ように", "ことに", "ものに"], answer: 0, explanation: "「〜ために」は目的を表す表現です。意志動詞＋ために。", detail: "「ために」は目的、「ように」は無意志動詞や可能形と一緒に使います。", example: "例：家を買うために、貯金している。" },
+            { q: "彼は日本人＿＿＿漢字が読めない。", options: ["のに", "けれど", "が", "すべて正解"], answer: 3, explanation: "「のに」「けれど」「が」はすべて逆接を表す接続表現として使えます。", detail: "「のに」は意外な気持ちが強く、「けれど」「が」は中立的な逆接です。", example: "例：高いのに、あまり美味しくない。" },
+            { q: "雨が降ったら＿＿＿、試合は中止です。", options: ["場合", "とき", "際", "すべて正解"], answer: 3, explanation: "「場合」「とき」「際」はすべて条件を表す表現として使えます。", detail: "「際」はやや硬い表現で、書き言葉でよく使われます。", example: "例：困った際は、ご連絡ください。" },
+            { q: "彼は優しい＿＿＿、時々厳しい。", options: ["ものの", "が", "けれども", "すべて正解"], answer: 3, explanation: "「ものの」「が」「けれども」はすべて逆接を表す接続表現です。", detail: "「ものの」はやや硬い表現で、書き言葉でよく使われます。", example: "例：努力したものの、失敗した。" },
+            { q: "彼女は疲れている＿＿＿、笑顔を見せた。", options: ["にもかかわらず", "のに", "が", "すべて正解"], answer: 3, explanation: "すべて逆接を表す表現で、予想に反する結果を述べるときに使います。", detail: "「にもかかわらず」は最も硬い表現です。", example: "例：反対されたにもかかわらず、実行した。" },
+            { q: "彼は勉強する＿＿＿、成績が上がらない。", options: ["わりに", "のに", "ものの", "すべて正解"], answer: 3, explanation: "すべて「〜するのに反して」という意味で逆接を表します。", detail: "「わりに」は「〜の程度に比べて」という意味も持ちます。", example: "例：値段のわりに、品質がいい。" },
+            { q: "明日天気が良ければ＿＿＿、ピクニックに行きます。", options: ["場合", "とき", "際", "すべて正解"], answer: 3, explanation: "すべて条件を表す表現として使えます。", detail: "「場合」は条件を明確に示す硬い表現です。", example: "例：雨の場合は、中止します。" },
+            { q: "彼は貧しい＿＿＿、心は豊かだ。", options: ["ものの", "けれども", "が", "すべて正解"], answer: 3, explanation: "すべて逆接を表す接続表現として使えます。", detail: "文脈によって使い分けますが、基本的な意味は同じです。", example: "例：小さいものの、便利だ。" },
+            { q: "雨が降って＿＿＿、試合は中止になった。", options: ["しまった", "きた", "いった", "みた"], answer: 0, explanation: "「〜てしまった」は完了や後悔を表す表現です。", detail: "望ましくない結果が起こったことを表します。", example: "例：財布を落としてしまった。" },
+            { q: "彼は努力した＿＿＿、成功した。", options: ["結果", "おかげで", "ため", "すべて正解"], answer: 3, explanation: "すべて原因と結果を表す表現として使えます。", detail: "「おかげで」は良い結果、「せいで」は悪い結果に使います。", example: "例：先生のおかげで、合格した。" },
+            { q: "彼女は美しい＿＿＿、性格もいい。", options: ["し", "うえに", "ばかりか", "すべて正解"], answer: 3, explanation: "すべて複数の事柄を並列する表現として使えます。", detail: "「し」は口語的、「うえに」「ばかりか」は書き言葉的です。", example: "例：安いし、美味しいし、最高だ。" },
+            { q: "試験が近い＿＿＿、遊んでいる。", options: ["のに", "から", "ので", "ため"], answer: 0, explanation: "「のに」は逆接を表し、予想に反する行動を述べるときに使います。", detail: "話し手の意外な気持ちを強調する表現です。", example: "例：約束したのに、来なかった。" },
+            { q: "彼は病気＿＿＿、学校を休んだ。", options: ["で", "だから", "なので", "すべて正解"], answer: 3, explanation: "すべて理由を表す接続表現として使えます。", detail: "「で」は名詞に付く理由の表現です。", example: "例：事故で、電車が遅れた。" },
+            { q: "努力すれば＿＿＿、成功できる。", options: ["こそ", "必ず", "きっと", "必ず・きっと"], answer: 3, explanation: "「すれば」は条件を表し、「必ず」「きっと」は確信を表します。", detail: "条件文では確信を表す副詞がよく使われます。", example: "例：頑張れば、必ず報われる。" },
+            { q: "彼は優しい＿＿＿、頼りになる。", options: ["し", "うえ", "ばかり", "から"], answer: 0, explanation: "「し」は複数の理由や特徴を並列する口語表現です。", detail: "「し」は話し言葉でよく使われます。", example: "例：安いし、近いし、便利だ。" },
+            { q: "雨が降る＿＿＿降らない＿＿＿、出かけます。", options: ["か、か", "も、も", "と、と", "でも、でも"], answer: 0, explanation: "「〜か〜か」は選択肢を示す表現です。", detail: "どちらの場合でも同じ結果になることを表します。", example: "例：行くか行かないか、決めてください。" },
+            { q: "彼女は歌が上手な＿＿＿、踊りも上手だ。", options: ["だけでなく", "ばかりか", "のみならず", "すべて正解"], answer: 3, explanation: "すべて「〜に加えて」という意味で使えます。", detail: "付け加えの表現で、書き言葉と話し言葉で使い分けます。", example: "例：日本語だけでなく、英語も話せる。" },
+            { q: "時間が＿＿＿、やってみます。", options: ["あれば", "あったら", "あるなら", "すべて正解"], answer: 3, explanation: "すべて条件を表す表現として使えます。", detail: "「ば」「たら」「なら」は微妙にニュアンスが異なりますが、多くの場合交換可能です。", example: "例：お金があれば、旅行したい。" },
+            { q: "彼は頭が良い＿＿＿、努力家だ。", options: ["し", "うえに", "上", "し・うえに"], answer: 3, explanation: "「し」と「うえに」はどちらも複数の特徴を述べるときに使えます。", detail: "「し」は口語的、「うえに」は書き言葉的です。", example: "例：親切だし、面白いし、最高の人だ。" },
+            { q: "彼女は忙しい＿＿＿、手伝ってくれた。", options: ["のに", "けど", "が", "すべて正解"], answer: 3, explanation: "すべて逆接を表す接続表現です。", detail: "「のに」は話し手の意外な気持ちを表します。", example: "例：疲れているのに、笑顔でいる。" },
+            { q: "試験に合格＿＿＿、喜んでいる。", options: ["して", "した", "できて", "すべて正解"], answer: 3, explanation: "すべて理由を表す表現として使えます。", detail: "動詞のて形は原因・理由を表すことができます。", example: "例：風邪を引いて、休んだ。" },
+            { q: "彼は日本語＿＿＿英語も話せる。", options: ["も", "に加えて", "のみならず", "すべて正解"], answer: 3, explanation: "すべて「〜に加えて」という意味で使えます。", detail: "複数の能力や特徴を述べる表現です。", example: "例：ピアノも弾けるし、歌も歌える。" }
+        ];
+
+        // 測驗2的30題（N2文法：授受、使役、受身）
+        const quiz2Questions = [
+            { q: "先生に本を＿＿＿。", options: ["いただいた", "くださった", "もらった", "いただいた・もらった"], answer: 3, explanation: "「いただく」は謙譲語、「もらう」は普通形で、どちらも「受け取る」意味です。", detail: "「いただく」は丁寧な場面で使い、「もらう」は日常会話で使います。", example: "例：先生に本をいただきました。" },
+            { q: "母が私に服を＿＿＿。", options: ["くれた", "あげた", "もらった", "やった"], answer: 0, explanation: "「くれる」は「私」に向けての授与を表します。", detail: "「くれる」は話し手や話し手側の人が恩恵を受けるときに使います。", example: "例：友達が私にプレゼントをくれた。" },
+            { q: "友達に本を＿＿＿。", options: ["あげた", "くれた", "もらった", "いただいた"], answer: 0, explanation: "「あげる」は「私」から相手への授与を表します。", detail: "「あげる」は話し手が他の人に何かを与えるときに使います。", example: "例：妹にお菓子をあげた。" },
+            { q: "先生が私に本を＿＿＿。", options: ["くださった", "いただいた", "あげた", "やった"], answer: 0, explanation: "「くださる」は尊敬語で、目上の人が「私」に何かを与えることを表します。", detail: "「くださる」は「くれる」の尊敬語です。", example: "例：社長が私にアドバイスをくださった。" },
+            { q: "子供に薬を＿＿＿。", options: ["飲ませた", "飲んだ", "飲ませられた", "飲まれた"], answer: 0, explanation: "「飲ませる」は使役形で、他の人に何かをさせることを表します。", detail: "使役形は「〜させる」の形で、他者に行動を促すことを表します。", example: "例：子供に野菜を食べさせる。" },
+            { q: "母に部屋を＿＿＿。", options: ["掃除させられた", "掃除させた", "掃除された", "掃除した"], answer: 0, explanation: "「掃除させられた」は使役受身で、強制されたことを表します。", detail: "使役受身は「〜させられる」の形で、不本意ながら行動することを表します。", example: "例：先生に宿題をやらせられた。" },
+            { q: "犬に手を＿＿＿。", options: ["噛まれた", "噛んだ", "噛ませた", "噛まされた"], answer: 0, explanation: "「噛まれた」は受身形で、被害を受けたことを表します。", detail: "受身形は「〜られる」の形で、他者からの行為を受けることを表します。", example: "例：蚊に刺された。" },
+            { q: "先生に＿＿＿。", options: ["褒められた", "褒めた", "褒めさせた", "褒めさせられた"], answer: 0, explanation: "「褒められた」は受身形で、他者から褒められたことを表します。", detail: "受身形は恩恵を受ける場合にも使われます。", example: "例：上司に褒められて嬉しい。" },
+            { q: "弟に宿題を＿＿＿。", options: ["手伝わせた", "手伝った", "手伝われた", "手伝わされた"], answer: 0, explanation: "「手伝わせた」は使役形で、弟に手伝いをさせたことを表します。", detail: "使役形は他者に行動を促す表現です。", example: "例：子供に荷物を運ばせた。" },
+            { q: "雨に＿＿＿。", options: ["降られた", "降った", "降らせた", "降らされた"], answer: 0, explanation: "「降られた」は受身形で、雨によって被害を受けたことを表します。", detail: "自然現象による被害も受身形で表現します。", example: "例：突然の雨に降られた。" },
+            { q: "先生に本を＿＿＿いただいた。", options: ["読んで", "読ませて", "読まれて", "読ませられて"], answer: 0, explanation: "「読んでいただいた」は「読んでもらった」の謙譲語です。", detail: "「〜ていただく」は丁寧にお願いする表現です。", example: "例：先生にチェックしていただいた。" },
+            { q: "母に服を＿＿＿もらった。", options: ["買って", "買わせて", "買われて", "買わされて"], answer: 0, explanation: "「買ってもらった」は他者に何かをしてもらったことを表します。", detail: "「〜てもらう」は恩恵を受ける表現です。", example: "例：友達に手伝ってもらった。" },
+            { q: "子供を病院に＿＿＿。", options: ["連れて行かせた", "連れて行った", "連れて行かれた", "連れて行かされた"], answer: 0, explanation: "「連れて行かせた」は使役形で、誰かに子供を連れて行かせたことを表します。", detail: "使役形は他者に行動を依頼・命令する表現です。", example: "例：部下に書類を届けさせた。" },
+            { q: "財布を＿＿＿。", options: ["盗まれた", "盗んだ", "盗ませた", "盗まされた"], answer: 0, explanation: "「盗まれた」は受身形で、被害を受けたことを表します。", detail: "被害の受身は日本語特有の表現です。", example: "例：自転車を盗まれた。" },
+            { q: "友達に写真を＿＿＿。", options: ["撮ってもらった", "撮ってあげた", "撮ってくれた", "撮ってもらった・撮ってくれた"], answer: 3, explanation: "「撮ってもらった」と「撮ってくれた」はどちらも友達に写真を撮ってもらったことを表します。", detail: "「〜てもらう」と「〜てくれる」は視点が異なりますが、同じ状況を表せます。", example: "例：友達に荷物を持ってもらった。" },
+            { q: "先生に論文を＿＿＿。", options: ["見ていただいた", "見てあげた", "見てくださった", "見ていただいた・見てくださった"], answer: 3, explanation: "「見ていただいた」（謙譲語）と「見てくださった」（尊敬語）はどちらも使えます。", detail: "謙譲語は自分を低め、尊敬語は相手を高める表現です。", example: "例：先生にチェックしていただいた。" },
+            { q: "部長に会議に＿＿＿。", options: ["出席させられた", "出席させた", "出席された", "出席した"], answer: 0, explanation: "「出席させられた」は使役受身で、強制的に出席させられたことを表します。", detail: "使役受身は不本意ながら行動することを表します。", example: "例：上司に残業させられた。" },
+            { q: "赤ちゃんを＿＿＿。", options: ["泣かせてしまった", "泣いてしまった", "泣かれてしまった", "泣かされてしまった"], answer: 0, explanation: "「泣かせてしまった」は使役形＋てしまうで、意図せず泣かせたことを表します。", detail: "「〜てしまう」は完了や後悔を表します。", example: "例：子供を怒らせてしまった。" },
+            { q: "隣の人に煙草を＿＿＿困った。", options: ["吸われて", "吸って", "吸わせて", "吸わされて"], answer: 0, explanation: "「吸われて」は受身形で、他者の行為によって迷惑を受けたことを表します。", detail: "迷惑の受身は日本語特有の表現です。", example: "例：隣の人に大声で話されて困った。" },
+            { q: "先生に質問を＿＿＿。", options: ["されて", "して", "させて", "させられて"], answer: 0, explanation: "「質問をされて」は受身形で、先生から質問を受けたことを表します。", detail: "「する」の受身形は「される」です。", example: "例：面接で難しい質問をされた。" },
+            { q: "友達に本を＿＿＿しまった。", options: ["貸して", "借りて", "貸されて", "借りさせて"], answer: 0, explanation: "「貸してしまった」は他者に本を貸したことを表します。", detail: "「〜てしまう」は完了を表します。", example: "例：大切な本を貸してしまった。" },
+            { q: "子供に部屋を＿＿＿。", options: ["片付けさせた", "片付けた", "片付けられた", "片付けされた"], answer: 0, explanation: "「片付けさせた」は使役形で、子供に片付けをさせたことを表します。", detail: "使役形は他者に行動を促す表現です。", example: "例：弟に買い物に行かせた。" },
+            { q: "母に夜遅くまで＿＿＿心配をかけた。", options: ["起きていて", "起きさせて", "起きられて", "起きされて"], answer: 0, explanation: "「起きていて」は継続を表し、母が遅くまで起きていたことを表します。", detail: "「〜ている」は状態の継続を表します。", example: "例：ずっと待っていてくれた。" },
+            { q: "先輩に仕事を＿＿＿。", options: ["教えていただいた", "教えてあげた", "教えさせた", "教えられた"], answer: 0, explanation: "「教えていただいた」は謙譲語で、先輩から教えてもらったことを表します。", detail: "「〜ていただく」は「〜てもらう」の謙譲語です。", example: "例：先生に説明していただいた。" },
+            { q: "犬に靴を＿＿＿困った。", options: ["噛まれて", "噛んで", "噛ませて", "噛まされて"], answer: 0, explanation: "「噛まれて」は受身形で、犬に噛まれて困ったことを表します。", detail: "被害の受身は日本語特有の表現です。", example: "例：蚊に刺されてかゆい。" },
+            { q: "部下に資料を＿＿＿。", options: ["作らせた", "作った", "作られた", "作らされた"], answer: 0, explanation: "「作らせた」は使役形で、部下に資料を作らせたことを表します。", detail: "使役形は命令や依頼を表します。", example: "例：学生にレポートを書かせた。" },
+            { q: "友達に秘密を＿＿＿しまった。", options: ["話して", "話されて", "話させて", "話させられて"], answer: 0, explanation: "「話してしまった」は秘密を話したことを後悔している表現です。", detail: "「〜てしまう」は後悔や完了を表します。", example: "例：約束を忘れてしまった。" },
+            { q: "先生に名前を＿＿＿。", options: ["呼ばれた", "呼んだ", "呼ばせた", "呼ばされた"], answer: 0, explanation: "「呼ばれた」は受身形で、先生に名前を呼ばれたことを表します。", detail: "受身形は他者からの行為を表します。", example: "例：友達に呼ばれて振り返った。" },
+            { q: "子供に野菜を＿＿＿。", options: ["食べさせた", "食べた", "食べられた", "食べさせられた"], answer: 0, explanation: "「食べさせた」は使役形で、子供に野菜を食べさせたことを表します。", detail: "使役形は他者に行動を促す表現です。", example: "例：薬を飲ませた。" },
+            { q: "上司に長時間＿＿＿疲れた。", options: ["待たされて", "待たせて", "待って", "待たれて"], answer: 0, explanation: "「待たされて」は使役受身で、強制的に待たされたことを表します。", detail: "使役受身は迷惑や不本意な行動を表します。", example: "例：１時間も待たされた。" }
+        ];
+
+        // 測驗3的30題（N2文法：推量、様態、伝聞）
+        const quiz3Questions = [
+            { q: "明日は雨が降る＿＿＿。", options: ["だろう", "そうだ", "らしい", "すべて正解"], answer: 3, explanation: "「だろう」「そうだ」「らしい」はすべて推量を表す表現です。", detail: "「だろう」は話し手の判断、「そうだ」は様子からの判断、「らしい」は情報からの判断です。", example: "例：彼は来ないだろう。" },
+            { q: "彼は病気＿＿＿。", options: ["らしい", "ようだ", "みたいだ", "すべて正解"], answer: 3, explanation: "すべて「〜のようだ」という推量を表す表現です。", detail: "「らしい」は情報から、「ようだ」「みたいだ」は様子からの判断です。", example: "例：雨が降るらしい。" },
+            { q: "この料理は美味し＿＿＿。", options: ["そうだ", "ようだ", "らしい", "だろう"], answer: 0, explanation: "「美味しそうだ」は見た目からの判断を表します。", detail: "形容詞語幹＋そうだは様子からの推量を表します。", example: "例：このケーキは美味しそうだ。" },
+            { q: "ニュース＿＿＿、明日は雪が降るそうだ。", options: ["によると", "では", "から", "すべて正解"], answer: 3, explanation: "すべて情報源を示す表現として使えます。", detail: "「によると」「では」「から」は情報の出所を示します。", example: "例：天気予報によると、明日は晴れだ。" },
+            { q: "彼は来ない＿＿＿。", options: ["かもしれない", "だろう", "ようだ", "すべて正解"], answer: 3, explanation: "すべて推量を表す表現として使えます。", detail: "「かもしれない」は可能性、「だろう」は確信度が高い推量です。", example: "例：雨が降るかもしれない。" },
+            { q: "先生の話＿＿＿、試験は難しいそうだ。", options: ["では", "によると", "から", "すべて正解"], answer: 3, explanation: "すべて伝聞の情報源を示す表現です。", detail: "伝聞表現では情報の出所を明示します。", example: "例：友達の話では、彼は結婚するそうだ。" },
+            { q: "この本は面白＿＿＿。", options: ["そうだ", "ようだ", "らしい", "そうだ・らしい"], answer: 3, explanation: "「面白そうだ」は様子から、「面白いらしい」は情報からの判断です。", detail: "「そうだ」と「らしい」は判断の根拠が異なります。", example: "例：あの映画は面白そうだ。" },
+            { q: "彼女は風邪を引いた＿＿＿。", options: ["ようだ", "らしい", "みたいだ", "すべて正解"], answer: 3, explanation: "すべて推量を表す表現として使えます。", detail: "「ようだ」「らしい」「みたいだ」は客観的な推量を表します。", example: "例：彼は怒っているようだ。" },
+            { q: "天気予報＿＿＿、台風が来るそうだ。", options: ["によれば", "では", "から", "すべて正解"], answer: 3, explanation: "すべて情報源を示す表現です。", detail: "「によれば」「では」「から」は伝聞表現で使われます。", example: "例：ニュースによれば、事故があったそうだ。" },
+            { q: "彼は優しい人＿＿＿。", options: ["らしい", "ようだ", "そうだ", "らしい・ようだ"], answer: 3, explanation: "「らしい」と「ようだ」は推量を表す表現として使えます。", detail: "「らしい」は情報から、「ようだ」は様子からの判断です。", example: "例：彼は学生らしい。" },
+            { q: "この問題は難し＿＿＿。", options: ["そうだ", "ようだ", "らしい", "すべて正解"], answer: 3, explanation: "すべて「難しい」という判断を表す表現です。", detail: "「そうだ」は見た目、「ようだ」「らしい」は判断からです。", example: "例：この問題は難しそうだ。" },
+            { q: "友達の話＿＿＿、彼は転職するそうだ。", options: ["では", "によると", "から", "すべて正解"], answer: 3, explanation: "すべて伝聞の情報源を示す表現です。", detail: "伝聞表現では「そうだ」とセットで使います。", example: "例：先生の話では、試験は来週だそうだ。" },
+            { q: "彼は忙し＿＿＿、会えないかもしれない。", options: ["いので", "いから", "くて", "すべて正解"], answer: 3, explanation: "すべて理由を表す表現として使えます。", detail: "形容詞の理由表現は複数の形があります。", example: "例：忙しいので、行けません。" },
+            { q: "この映画は面白＿＿＿よ。", options: ["いそうだ", "そうだ", "いらしい", "すべて正解"], answer: 3, explanation: "すべて推量を表す表現として使えます。", detail: "文脈によって使い分けます。", example: "例：この本は面白そうだよ。" },
+            { q: "明日は晴れる＿＿＿。", options: ["でしょう", "だろう", "ではないでしょうか", "すべて正解"], answer: 3, explanation: "すべて推量を表す丁寧な表現です。", detail: "「でしょう」は「だろう」の丁寧形です。", example: "例：明日は雨でしょう。" },
+            { q: "彼は学生＿＿＿。", options: ["のようだ", "らしい", "みたいだ", "すべて正解"], answer: 3, explanation: "すべて「学生だと思われる」という推量を表します。", detail: "名詞＋のようだ/らしい/みたいだは推量を表します。", example: "例：彼は医者のようだ。" },
+            { q: "ニュース＿＿＿、地震があったそうだ。", options: ["によると", "では", "の情報では", "すべて正解"], answer: 3, explanation: "すべて情報源を示す伝聞表現です。", detail: "伝聞表現では情報の出所を明示することが重要です。", example: "例：天気予報によると、明日は雪だそうだ。" },
+            { q: "この服は高＿＿＿。", options: ["そうだ", "いようだ", "いらしい", "すべて正解"], answer: 3, explanation: "すべて「高い」という判断を表す表現です。", detail: "判断の根拠によって使い分けます。", example: "例：この時計は高そうだ。" },
+            { q: "彼女は疲れて＿＿＿。", options: ["いるようだ", "いるらしい", "いそうだ", "すべて正解"], answer: 3, explanation: "すべて推量を表す表現として使えます。", detail: "「いるようだ」「いるらしい」は状態の推量です。", example: "例：彼は寝ているようだ。" },
+            { q: "先生の話＿＿＿、明日は休みだそうだ。", options: ["によれば", "では", "だと", "すべて正解"], answer: 3, explanation: "すべて伝聞の情報源を示す表現です。", detail: "「〜だと」も情報源を示す表現として使えます。", example: "例：噂だと、彼は結婚したそうだ。" },
+            { q: "彼は来る＿＿＿思います。", options: ["と", "だろうと", "ようだと", "すべて正解"], answer: 3, explanation: "すべて「思う」と一緒に使える推量表現です。", detail: "「と思う」は話し手の意見を表します。", example: "例：明日は晴れると思います。" },
+            { q: "この問題は簡単＿＿＿。", options: ["そうに見える", "ように見える", "らしく見える", "そうに見える・ように見える"], answer: 3, explanation: "「そうに見える」と「ように見える」は外見からの判断を表します。", detail: "「見える」は視覚的な印象を表します。", example: "例：彼は優しそうに見える。" },
+            { q: "天気予報＿＿＿、雨が降るそうです。", options: ["によると", "では", "から", "すべて正解"], answer: 3, explanation: "すべて伝聞の情報源を示す表現です。", detail: "丁寧な場面では「そうです」を使います。", example: "例：ニュースによると、事故があったそうです。" },
+            { q: "彼は優秀な学生＿＿＿。", options: ["らしい", "のようだ", "だそうだ", "すべて正解"], answer: 3, explanation: "すべて推量や伝聞を表す表現です。", detail: "「だそうだ」は伝聞、「らしい」「のようだ」は推量です。", example: "例：彼は有名な作家らしい。" },
+            { q: "明日は寒く＿＿＿。", options: ["なるそうだ", "なるだろう", "なるらしい", "すべて正解"], answer: 3, explanation: "すべて未来の推量を表す表現です。", detail: "「そうだ」は伝聞、「だろう」「らしい」は推量です。", example: "例：明日は暑くなるそうだ。" },
+            { q: "この店は人気が＿＿＿。", options: ["あるそうだ", "あるらしい", "あるようだ", "すべて正解"], answer: 3, explanation: "すべて「人気がある」という情報や判断を表します。", detail: "伝聞と推量の両方で使えます。", example: "例：この店は美味しいそうだ。" },
+            { q: "彼女は忙し＿＿＿、来られないそうだ。", options: ["いので", "くて", "いから", "すべて正解"], answer: 3, explanation: "すべて理由を表す表現として使えます。", detail: "理由を表す形容詞の接続形です。", example: "例：暑いので、窓を開けた。" },
+            { q: "この本は難し＿＿＿感じた。", options: ["いと", "そうだと", "いように", "すべて正解"], answer: 3, explanation: "すべて「感じた」と一緒に使える表現です。", detail: "「と」「ように」は内容を示す接続詞です。", example: "例：彼は優しいと感じた。" },
+            { q: "友達の話＿＿＿、試験は延期だそうだ。", options: ["では", "によると", "だと", "すべて正解"], answer: 3, explanation: "すべて伝聞の情報源を示す表現です。", detail: "情報の出所を明示する表現です。", example: "例：噂では、彼は辞めるそうだ。" },
+            { q: "彼は元気＿＿＿。", options: ["そうだ", "なようだ", "らしい", "すべて正解"], answer: 3, explanation: "すべて「元気だ」という判断を表す表現です。", detail: "な形容詞の推量表現です。", example: "例：彼は元気そうだ。" }
+        ];
 
         const quizData = {
-            "quiz1": generateQuizQuestions(1),
-            "quiz2": generateQuizQuestions(2),
-            "quiz3": generateQuizQuestions(3),
-            "quiz4": generateQuizQuestions(4),
-            "quiz5": generateQuizQuestions(5),
-            "quiz6": generateQuizQuestions(6),
-            "quiz7": generateQuizQuestions(7),
-            "quiz8": generateQuizQuestions(8),
-            "quiz9": generateQuizQuestions(9)
+            "quiz1": quiz1Questions,
+            "quiz2": quiz2Questions,
+            "quiz3": quiz3Questions
         };
 
         function getLocalStats() {
@@ -591,7 +587,7 @@
             quizGrid.innerHTML = '';
             
             quizIds.forEach((quizId, index) => {
-                const quizStat = stats[quizId] || { attempts: 0, highestScore: 0, total: 50 };
+                const quizStat = stats[quizId] || { attempts: 0, highestScore: 0, total: 30 };
                 const hasAttempted = quizStat.attempts > 0;
                 
                 const card = document.createElement('div');
@@ -600,7 +596,7 @@
                     <div class="quiz-card-title">測驗 ${index + 1} ${hasAttempted ? '✓' : ''}</div>
                     <div class="quiz-card-stats">
                         <div><span class="stat-label">已測驗：</span>${quizStat.attempts} 次</div>
-                        <div><span class="stat-label">最高分：</span>${quizStat.highestScore} / 50</div>
+                        <div><span class="stat-label">最高分：</span>${quizStat.highestScore} / 30</div>
                     </div>
                     <button class="start-btn" data-quiz-id="${quizId}">${hasAttempted ? '再次測驗' : '開始測驗'}</button>
                 `;
@@ -672,7 +668,6 @@
             const totalQuestions = questions.length;
             
             if (Object.keys(userAnswers).length < totalQuestions) {
-                // 找到第一個未作答的題目
                 for (let i = 0; i < totalQuestions; i++) {
                     if (userAnswers[i] === undefined) {
                         const unansweredQuestion = document.getElementById(`question-${i}`);
@@ -895,5 +890,5 @@
 
         initializeApp();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a47471fd38d6e87',t:'MTc2NDEzODAwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a47ead772b8c4ed',t:'MTc2NDE0NDcxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
