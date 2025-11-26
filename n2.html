@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N2 文法單字特訓 (450題)</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 { text-align: center; margin: 0 0 10px 0; font-size: 1.5rem; color: var(--primary); }
+        
+        /* Menu Screen */
+        #menu-screen { display: flex; flex-direction: column; gap: 15px; }
+        .set-btn {
+            padding: 15px;
+            font-size: 1.1rem;
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        .set-btn:hover { background: var(--primary); color: white; }
+        .set-btn.disabled { border-color: #ccc; color: #ccc; cursor: not-allowed; background: #fff; }
+
+        /* Quiz Screen */
+        #quiz-screen { display: none; }
+        .progress-bar {
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        .question-box {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option-btn {
+            padding: 16px;
+            text-align: left;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .option-btn:hover:not(.disabled) { border-color: var(--primary); background: #eff6ff; }
+        
+        .option-btn.correct { background: #d1fae5; border-color: var(--success); color: #065f46; }
+        .option-btn.wrong { background: #fee2e2; border-color: var(--error); color: #991b1b; }
+
+        .explanation-box {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            border-radius: 4px;
+            display: none; /* Hidden by default */
+        }
+        .exp-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; }
+        .exp-detail { font-size: 0.95rem; margin-bottom: 5px; color: #4b5563; }
+        .exp-example { font-style: italic; color: #6b7280; font-size: 0.9rem; }
+
+        .nav-btn {
+            margin-top: 20px;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            display: none;
+        }
+
+        /* Result Screen */
+        #result-screen { display: none; text-align: center; }
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 20px auto;
+        }
+        .home-btn {
+            background: #374151;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>N2 日本語能力試驗對策</h1>
+
+    <div id="menu-screen">
+        <p style="text-align: center; color: #666;">請選擇題庫 (每組50題)</p>
+        <div id="set-buttons-container">
+            </div>
+    </div>
+
+    <div id="quiz-screen">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="stats">
+            <span id="question-count">Q: 1/50</span>
+            <span id="score-display">Score: 0</span>
+        </div>
+        
+        <div class="question-box" id="question-text">題目載入中...</div>
+        
+        <div class="options-grid" id="options-container">
+            </div>
+
+        <div class="explanation-box" id="explanation-area">
+            <div class="exp-title">解説：<span id="exp-text"></span></div>
+            <div class="exp-detail" id="exp-detail"></div>
+            <div class="exp-example" id="exp-example"></div>
+        </div>
+
+        <button class="nav-btn" id="next-btn" onclick="nextQuestion()">下一題</button>
+    </div>
+
+    <div id="result-screen">
+        <h2>測驗結束!</h2>
+        <div class="score-circle" id="final-score"></div>
+        <p id="result-message"></p>
+        <button class="home-btn" onclick="goHome()">返回主選單</button>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 資料區：這裡存放所有的題目資料
+    // ==========================================
+    const allQuestionSets = {
+        1: [
+  {
+    "id": 1,
+    "q": "彼にお金を貸すなんて、捨てる＿＿＿だ。",
+    "options": ["ようなもの", "ごときもの", "にせよ", "ばかり"],
+    "answer": 0,
+    "explanation": "「～ようなものだ」は「～と同じようだ」という意味を表す。",
+    "detail": "這就像是...一樣（比喻）。借錢給他簡直就像是把錢丟掉一樣。",
+    "example": "人生はマラソンのようなものだ。"
+  },
+  {
+    "id": 2,
+    "q": "この薬は副作用の＿＿＿があるので、医師の指示に従ってください。",
+    "options": ["おそれ", "おかげ", "せい", "かぎり"],
+    "answer": 0,
+    "explanation": "「～おそれがある」は「悪いことが起こる可能性がある」という意味。",
+    "detail": "～おそれがある：有...的危險/疑慮（通常用於負面情況）。",
+    "example": "台風の上陸で、洪水のおそれがある。"
+  },
+  {
+    "id": 3,
+    "q": "努力した＿＿＿、試験に合格することができた。",
+    "options": ["かいがあって", "かいもなく", "おかげで", "せいで"],
+    "answer": 0,
+    "explanation": "「～かいがあって」は「努力などの効果が表れて」という意味。",
+    "detail": "～かいがあって：有～的價值/回報。沒有白費...。",
+    "example": "練習のかいがあって、優勝できた。"
+  },
+  {
+    "id": 4,
+    "q": "彼は約束の時間に遅れた＿＿＿、謝りもしなかった。",
+    "options": ["あげく", "ばかりか", "きり", "あまり"],
+    "answer": 1,
+    "explanation": "「～ばかりか」は「～だけでなく」という意味。",
+    "detail": "～ばかりか：不但...而且...（不僅沒有道歉，還...）。",
+    "example": "その店は味が悪いばかりか、店員の態度もひどい。"
+  },
+  {
+    "id": 5,
+    "q": "この曲を聞く＿＿＿、学生時代を思い出す。",
+    "options": ["につけ", "たびに", "最中に", "とおりに"],
+    "answer": 1,
+    "explanation": "「～たびに」は「その時はいつも」という意味。",
+    "detail": "～たびに：每當...的時候（總是會...）。",
+    "example": "父は出張のたびに、お土産を買ってきてくれる。"
+  },
+  {
+    "id": 6,
+    "q": "忙しい＿＿＿、ご連絡をいただきありがとうございます。",
+    "options": ["ところ", "こと", "もの", "わけ"],
+    "answer": 0,
+    "explanation": "「お忙しいところ」は相手に迷惑をかけることをわびる慣用表現。",
+    "detail": "～ところ：在...的情況下/時候（常用於客套話）。百忙之中...",
+    "example": "お休みのところ、お邪魔してすみません。"
+  },
+  {
+    "id": 7,
+    "q": "一度決めた＿＿＿、最後までやり遂げたい。",
+    "options": ["からには", "といっても", "わりに", "くせに"],
+    "answer": 0,
+    "explanation": "「～からには」は「～なのだから当然」という決意や義務を表す。",
+    "detail": "～からには：既然...就（表示決心或義務）。",
+    "example": "試合に出るからには、勝ちたい。"
+  },
+  {
+    "id": 8,
+    "q": "会議の＿＿＿、携帯電話が鳴ってしまった。",
+    "options": ["最中に", "うちに", "あいだに", "たびに"],
+    "answer": 0,
+    "explanation": "「～最中に」は「ちょうど～している時に」という意味。",
+    "detail": "～最中に：正在...的時候（強調某個動作進行中被打斷）。",
+    "example": "食事の最中に客が来た。"
+  },
+  {
+    "id": 9,
+    "q": "彼女は才能がある＿＿＿、努力も怠らない。",
+    "options": ["うえに", "うちに", "かわりに", "とおりに"],
+    "answer": 0,
+    "explanation": "「～うえに」は「～に加えて」という意味。",
+    "detail": "～うえに：再加上.../而且...（累加關係）。",
+    "example": "昨日は寒いうえに、風も強かった。"
+  },
+  {
+    "id": 10,
+    "q": "この問題は複雑すぎて、私には理解し＿＿＿。",
+    "options": ["かねる", "かける", "うる", "ざるを得ない"],
+    "answer": 0,
+    "explanation": "「～かねる」は「～しようとしてもできない」という婉曲的な不可能表現。",
+    "detail": "～かねる：難以.../無法...（表示心理上或情境上的困難）。",
+    "example": "その件については、お答えしかねます。"
+  },
+  {
+    "id": 11,
+    "q": "彼は周囲の反対を＿＿＿、留学を決めた。",
+    "options": ["おして", "よそに", "ものともせず", "こめて"],
+    "answer": 1,
+    "explanation": "「～をよそに」は「～を気にしないで」という意味。",
+    "detail": "～をよそに：不顧.../無視...（繼續做某事）。",
+    "example": "親の心配をよそに、彼は遊び回っている。"
+  },
+  {
+    "id": 12,
+    "q": "新製品の発売に＿＿＿、イベントが行われた。",
+    "options": ["先立って", "応じて", "加えて", "反して"],
+    "answer": 0,
+    "explanation": "「～に先立って」は「～の前に」という意味。",
+    "detail": "～に先立って：在...之前/先行於...。",
+    "example": "開会に先立って、挨拶があった。"
+  },
+  {
+    "id": 13,
+    "q": "このレストランは味もよければ、雰囲気も＿＿＿。",
+    "options": ["よい", "いい", "よかった", "よくない"],
+    "answer": 0,
+    "explanation": "「Aも～ばBも～」で「AもBも両方」という意味。",
+    "detail": "～も～ば～も...：既...又...（列舉並列）。",
+    "example": "彼は勉強もできれば、スポーツもできる。"
+  },
+  {
+    "id": 14,
+    "q": "雨が降っている＿＿＿で、試合は中止になった。",
+    "options": ["せい", "おかげ", "ため", "こと"],
+    "answer": 0,
+    "explanation": "「～せいで」は「～が原因で悪い結果になった」という意味。",
+    "detail": "～せいで：都怪.../因為...的緣故（導致負面結果）。",
+    "example": "寝坊したせいで、電車に乗り遅れた。"
+  },
+  {
+    "id": 15,
+    "q": "この仕事は、経験がない私には荷が＿＿＿。",
+    "options": ["重い", "重すぎる", "勝つ", "負ける"],
+    "answer": 0,
+    "explanation": "「荷が重い」は「責任や負担が大きすぎて、能力を超えている」という意味。",
+    "detail": "荷が重い：負擔太重/力不從心。",
+    "example": "リーダーの役は、私には荷が重い。"
+  },
+  {
+    "id": 16,
+    "q": "彼は毎日、＿＿＿と勉強に励んでいる。",
+    "options": ["せっせ", "いきいき", "うとうと", "まあまあ"],
+    "answer": 0,
+    "explanation": "「せっせと」は「休まずに熱心に」という意味。",
+    "detail": "せっせと：拼命地/勤奮地。",
+    "example": "彼は将来のために、せっせと貯金している。"
+  },
+  {
+    "id": 17,
+    "q": "商品の＿＿＿をご希望の方は、こちらにご記入ください。",
+    "options": ["返品", "返却", "返信", "返済"],
+    "answer": 0,
+    "explanation": "「返品」は「買った商品を店に返すこと」という意味。",
+    "detail": "返品：退貨。",
+    "example": "サイズが合わなかったので、返品した。"
+  },
+  {
+    "id": 18,
+    "q": "このプロジェクトは、会社の将来に＿＿＿重要なものだ。",
+    "options": ["関わる", "関する", "対する", "基づく"],
+    "answer": 0,
+    "explanation": "「～に関わる」は「～に重大な影響を及ぼす」という意味。",
+    "detail": "～に関わる：關係到.../影響到...（通常指生死、名譽等重大事項）。",
+    "example": "命に関わる病気ではない。"
+  },
+  {
+    "id": 19,
+    "q": "今回の失敗は、私の不注意による＿＿＿です。",
+    "options": ["もの", "こと", "わけ", "ところ"],
+    "answer": 0,
+    "explanation": "「～によるものだ」は「～が原因だ」という意味。",
+    "detail": "～によるものだ：是由於.../是...所造成的。",
+    "example": "事故の原因は、スピードの出し過ぎによるものだ。"
+  },
+  {
+    "id": 20,
+    "q": "もっと早く家を出ればよかった。遅刻してしまって＿＿＿。",
+    "options": ["悔しい", "情けない", "惜しい", "怪しい"],
+    "answer": 0,
+    "explanation": "「悔しい」は「残念で腹が立つ」という意味。",
+    "detail": "悔しい：懊悔的/不甘心的。",
+    "example": "試合に負けて悔しい。"
+  },
+  {
+    "id": 21,
+    "q": "彼は何も知らなかった＿＿＿をした。",
+    "options": ["ふり", "まね", "こと", "わけ"],
+    "answer": 0,
+    "explanation": "「～ふりをする」は「実際は違うのに、そうであるように見せる」という意味。",
+    "detail": "～ふりをする：裝作...的樣子。",
+    "example": "聞こえないふりをした。"
+  },
+  {
+    "id": 22,
+    "q": "あの人は口が＿＿＿から、秘密は話さないほうがいい。",
+    "options": ["軽い", "重い", "堅い", "悪い"],
+    "answer": 0,
+    "explanation": "「口が軽い」は「秘密などをすぐに人に話してしまう」という意味。",
+    "detail": "口が軽い：嘴巴大/守不住秘密。",
+    "example": "彼は口が軽いので、信用できない。"
+  },
+  {
+    "id": 23,
+    "q": "駅前でチラシを＿＿＿。",
+    "options": ["配る", "配分する", "配達する", "配置する"],
+    "answer": 0,
+    "explanation": "「配る」は「多くの人に渡す」という意味。",
+    "detail": "配る：分發/發送。",
+    "example": "先生がテスト用紙を配る。"
+  },
+  {
+    "id": 24,
+    "q": "この計画を実行に移す＿＿＿、いくつかの問題点がある。",
+    "options": ["にあたって", "につれて", "に際して", "に伴って"],
+    "answer": 0,
+    "explanation": "「～にあたって」は「～をする時に（その準備として）」という意味。",
+    "detail": "～にあたって：在...之際/正當...時候（表示面臨某重要階段）。",
+    "example": "開会にあたって、一言ご挨拶申し上げます。"
+  },
+  {
+    "id": 25,
+    "q": "彼は、自分の意見を主張して＿＿＿。",
+    "options": ["やまない", "譲らない", "離さない", "通さない"],
+    "answer": 1,
+    "explanation": "「譲らない」は「自分の考えを変えない」という意味。",
+    "detail": "譲らない：不退讓/堅持己見。",
+    "example": "彼は一歩も譲らない。"
+  },
+  {
+    "id": 26,
+    "q": "最近、目が悪くなったせいか、字が＿＿＿見える。",
+    "options": ["ぼんやり", "はっきり", "すっきり", "がっかり"],
+    "answer": 0,
+    "explanation": "「ぼんやり」は「はっきりしない様子」という意味。",
+    "detail": "ぼんやり：模糊/不清楚。",
+    "example": "霧で山がぼんやりとしか見えない。"
+  },
+  {
+    "id": 27,
+    "q": "説明書を読めば、使い方は＿＿＿わかる。",
+    "options": ["おのずと", "ひとりでに", "勝手に", "次第に"],
+    "answer": 0,
+    "explanation": "「おのずと」は「自然に」という意味。",
+    "detail": "おのずと：自然而然地。",
+    "example": "努力すれば、結果はおのずとついてくる。"
+  },
+  {
+    "id": 28,
+    "q": "彼の話は＿＿＿ばかりで、要点がわからない。",
+    "options": ["言い訳", "文句", "自慢", "理屈"],
+    "answer": 3,
+    "explanation": "「理屈」は「物事の筋道だが、現実を無視した論理」というニュアンスもある。",
+    "detail": "理屈：道理/歪理（在此指光說大道理）。",
+    "example": "理屈ばかりこねるな。"
+  },
+  {
+    "id": 29,
+    "q": "もう子供ではないのだから、親に＿＿＿ないで自立しなさい。",
+    "options": ["頼る", "甘える", "従う", "逆らう"],
+    "answer": 1,
+    "explanation": "「甘える」は「相手の好意に頼る」という意味。",
+    "detail": "甘える：撒嬌/依賴。",
+    "example": "親に甘えてばかりいないで、自分でやりなさい。"
+  },
+  {
+    "id": 30,
+    "q": "彼は有名な作家＿＿＿、気さくな人柄だ。",
+    "options": ["にしては", "わりには", "だけに", "なりに"],
+    "answer": 0,
+    "explanation": "「～にしては」は「～という事実から予想されることとは違って」という意味。",
+    "detail": "～にしては：照...來說/以...的身分來說（表示意外）。",
+    "example": "彼は初心者にしては、上手だ。"
+  },
+  {
+    "id": 31,
+    "q": "優勝が決まった瞬間、選手たちは抱き合って＿＿＿。",
+    "options": ["喜んだ", "悲しんだ", "悔やんだ", "惜しんだ"],
+    "answer": 0,
+    "explanation": "「喜ぶ」は「うれしく思う」という意味。",
+    "detail": "喜んだ：高興/喜悅。",
+    "example": "合格の知らせを聞いて喜んだ。"
+  },
+  {
+    "id": 32,
+    "q": "この料理は、素材の味を＿＿＿味付けになっている。",
+    "options": ["生かした", "殺した", "加えた", "減らした"],
+    "answer": 0,
+    "explanation": "「生かす」は「長所や特徴を効果的に使う」という意味。",
+    "detail": "生かした：發揮/活用。",
+    "example": "経験を生かして働く。"
+  },
+  {
+    "id": 33,
+    "q": "いくら頼まれても、悪いことには＿＿＿できない。",
+    "options": ["協力", "努力", "強力", "権力"],
+    "answer": 0,
+    "explanation": "「協力」は「力を合わせて物事を行うこと」という意味。",
+    "detail": "協力：合作/協助。",
+    "example": "アンケートにご協力ください。"
+  },
+  {
+    "id": 34,
+    "q": "あの映画は、何度見ても＿＿＿。",
+    "options": ["飽きない", "呆れない", "諦めない", "空かない"],
+    "answer": 0,
+    "explanation": "「飽きる」は「同じことが続いて嫌になる」という意味。",
+    "detail": "飽きない：不膩/不厭倦。",
+    "example": "毎日カレーでも飽きない。"
+  },
+  {
+    "id": 35,
+    "q": "この小説は事実を＿＿＿書かれている。",
+    "options": ["もとに", "めぐって", "こめて", "つうじて"],
+    "answer": 0,
+    "explanation": "「～をもとに」は「～を素材・基礎として」という意味。",
+    "detail": "～をもとに：以...為基礎/根據...。",
+    "example": "実話をもとにした映画。"
+  },
+  {
+    "id": 36,
+    "q": "彼女の笑顔を見ると、疲れが＿＿＿ような気がする。",
+    "options": ["癒される", "治される", "直される", "正される"],
+    "answer": 0,
+    "explanation": "「癒される」は「心や体の苦痛がなくなる」という意味。",
+    "detail": "癒される：被治癒/得到慰藉。",
+    "example": "ペットの姿に癒される。"
+  },
+  {
+    "id": 37,
+    "q": "テストの結果が悪くて、親に＿＿＿。",
+    "options": ["叱られた", "怒られた", "褒められた", "謝られた"],
+    "answer": 0,
+    "explanation": "「叱る」は「目下の人の悪い点を厳しく注意する」という意味。",
+    "detail": "叱られた：被罵/被訓斥。（「怒られた」も使うが、「叱られた」の方が教育的なニュアンスが強い）。",
+    "example": "いたずらをして先生に叱られた。"
+  },
+  {
+    "id": 38,
+    "q": "彼は責任感が強く、仕事を＿＿＿ことはない。",
+    "options": ["投げ出す", "放り出す", "追い出す", "貸し出す"],
+    "answer": 0,
+    "explanation": "「投げ出す」は「途中でやめる」という意味。",
+    "detail": "投げ出す：半途而廢/放棄。",
+    "example": "途中で投げ出さずに、最後までやりなさい。"
+  },
+  {
+    "id": 39,
+    "q": "この部屋は日当たりがよくて＿＿＿。",
+    "options": ["快適だ", "適当だ", "適切だ", "適度だ"],
+    "answer": 0,
+    "explanation": "「快適」は「気持ちよく過ごせること」という意味。",
+    "detail": "快適だ：舒適的。",
+    "example": "快適な暮らし。"
+  },
+  {
+    "id": 40,
+    "q": "そんなことを言われると、身も蓋も＿＿＿。",
+    "options": ["ない", "ある", "多い", "少ない"],
+    "answer": 0,
+    "explanation": "「身も蓋もない」は「露骨すぎて、情緒も何もあったものではない」という意味の慣用句。",
+    "detail": "身も蓋もない：太露骨了/毫不留情（話說得太直白，讓人無法回應）。",
+    "example": "そう言われると身も蓋もない。"
+  },
+  {
+    "id": 41,
+    "q": "彼は医者になる＿＿＿、猛勉強している。",
+    "options": ["べく", "はず", "まま", "ほど"],
+    "answer": 0,
+    "explanation": "「～べく」は「～しようと思って（目的）」という意味。",
+    "detail": "～べく：為了...（書面語）。",
+    "example": "問題を解決すべく、話し合いが行われた。"
+  },
+  {
+    "id": 42,
+    "q": "この製品は、性能はもちろんデザイン＿＿＿優れている。",
+    "options": ["においても", "にかけては", "にとって", "について"],
+    "answer": 0,
+    "explanation": "「～においても」は「～という点・場所・時でも」という意味。",
+    "detail": "～においても：在...方面也.../在...情況下也...。",
+    "example": "学業においてもスポーツにおいても優秀だ。"
+  },
+  {
+    "id": 43,
+    "q": "彼は、知っているくせに＿＿＿。",
+    "options": ["知らないふりをしている", "知っているふりをしている", "知るはずがない", "知らざるを得ない"],
+    "answer": 0,
+    "explanation": "「くせに」は「のに」と同様に逆接を表すが、非難の気持ちが含まれる。",
+    "detail": "知らないふりをしている：裝作不知道。",
+    "example": "元気なくせに、病気のふりをする。"
+  },
+  {
+    "id": 44,
+    "q": "そのニュースを聞いて、耳を＿＿＿。",
+    "options": ["疑った", "澄ませた", "傾けた", "ふさいだ"],
+    "answer": 0,
+    "explanation": "「耳を疑う」は「信じられない話を聞いて、聞き間違いかと思う」という意味。",
+    "detail": "疑った：懷疑（不敢相信自己的耳朵）。",
+    "example": "信じられない内容に、耳を疑った。"
+  },
+  {
+    "id": 45,
+    "q": "この機械の操作は＿＿＿簡単だ。",
+    "options": ["案外", "意外", "存外", "度外"],
+    "answer": 0,
+    "explanation": "「案外」は「予想していたのとは違って」という意味。",
+    "detail": "案外：意想不到地/意外地。",
+    "example": "彼は案外いい人かもしれない。"
+  },
+  {
+    "id": 46,
+    "q": "彼女は誰に対しても＿＿＿振る舞う。",
+    "options": ["公平に", "公表に", "好評に", "公衆に"],
+    "answer": 0,
+    "explanation": "「公平」は「偏りがないこと」という意味。",
+    "detail": "公平に：公平地/一視同仁地。",
+    "example": "利益を公平に分配する。"
+  },
+  {
+    "id": 47,
+    "q": "山頂からの景色は、言葉に＿＿＿ほど美しかった。",
+    "options": ["尽くせない", "出せない", "表せない", "限らない"],
+    "answer": 0,
+    "explanation": "「言葉に尽くせない」は「言葉では表現しきれない」という意味。",
+    "detail": "尽くせない：無法用言語形容的（竭盡）。",
+    "example": "感謝の気持ちは言葉に尽くせない。"
+  },
+  {
+    "id": 48,
+    "q": "書類に不備があったため、受理されずに＿＿＿。",
+    "options": ["突き返された", "突き飛ばされた", "突き止めた", "突き当たった"],
+    "answer": 0,
+    "explanation": "「突き返す」は「受け取らずに相手に戻す」という意味。",
+    "detail": "突き返された：被退回。",
+    "example": "要求を突き返す。"
+  },
+  {
+    "id": 49,
+    "q": "彼は冗談を言って、場を＿＿＿。",
+    "options": ["和ませた", "和らげた", "静めた", "荒らした"],
+    "answer": 0,
+    "explanation": "「和ませる（なごませる）」は「雰囲気を穏やかにする」という意味。",
+    "detail": "和ませた：緩和（氣氛）/使...溫和。",
+    "example": "緊張した場を和ませる。"
+  },
+  {
+    "id": 50,
+    "q": "この件に関しては、一切＿＿＿ありません。",
+    "options": ["関わり", "関心", "関連", "関係"],
+    "answer": 0,
+    "explanation": "「関わり」は「関係」という意味だが、否定文で強く関係を否定する際によく使われる。",
+    "detail": "関わり：瓜葛/牽連。",
+    "example": "あの事件とは関わりたくない。"
+  }
+],
+        2: [], // 之後貼上 File 2
+        3: [], // 之後貼上 File 3
+        4: [], // ...
+        5: [],
+        6: [],
+        7: [],
+        8: [],
+        9: []
+    };
+
+    // ==========================================
+    // 程式邏輯區
+    // ==========================================
+    
+    let currentSetKey = 1;
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let isAnswered = false;
+
+    // DOM Elements
+    const menuScreen = document.getElementById('menu-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const setButtonsContainer = document.getElementById('set-buttons-container');
+
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const nextBtn = document.getElementById('next-btn');
+    const progressFill = document.getElementById('progress-fill');
+    const questionCount = document.getElementById('question-count');
+    const scoreDisplay = document.getElementById('score-display');
+    const explanationArea = document.getElementById('explanation-area');
+    const expText = document.getElementById('exp-text');
+    const expDetail = document.getElementById('exp-detail');
+    const expExample = document.getElementById('exp-example');
+
+    // Init
+    window.onload = function() {
+        renderMenu();
+    }
+
+    function renderMenu() {
+        setButtonsContainer.innerHTML = '';
+        for (let i = 1; i <= 9; i++) {
+            const btn = document.createElement('div');
+            const count = allQuestionSets[i] ? allQuestionSets[i].length : 0;
+            
+            btn.className = `set-btn ${count === 0 ? 'disabled' : ''}`;
+            btn.innerHTML = `第 ${i} 回 (${(i-1)*50 + 1} - ${i*50}) ${count === 0 ? '<br><small>待更新</small>' : ''}`;
+            
+            if (count > 0) {
+                btn.onclick = () => startQuiz(i);
+            }
+            setButtonsContainer.appendChild(btn);
+        }
+    }
+
+    function startQuiz(setKey) {
+        currentSetKey = setKey;
+        currentQuestions = allQuestionSets[setKey];
+        currentQuestionIndex = 0;
+        score = 0;
+        
+        menuScreen.style.display = 'none';
+        resultScreen.style.display = 'none';
+        quizScreen.style.display = 'block';
+        
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        isAnswered = false;
+        nextBtn.style.display = 'none';
+        explanationArea.style.display = 'none';
+        
+        const q = currentQuestions[currentQuestionIndex];
+        
+        // Update Stats
+        questionCount.innerText = `Q: ${currentQuestionIndex + 1} / ${currentQuestions.length}`;
+        scoreDisplay.innerText = `Score: ${score}`;
+        const progress = ((currentQuestionIndex) / currentQuestions.length) * 100;
+        progressFill.style.width = `${progress}%`;
+
+        // Render Text
+        questionText.innerText = q.q;
+        
+        // Render Options
+        optionsContainer.innerHTML = '';
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(index, btn);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIndex, btnElement) {
+        if (isAnswered) return;
+        isAnswered = true;
+
+        const q = currentQuestions[currentQuestionIndex];
+        const correctIndex = q.answer;
+
+        const allOptions = document.querySelectorAll('.option-btn');
+        allOptions.forEach(btn => btn.classList.add('disabled'));
+
+        if (selectedIndex === correctIndex) {
+            btnElement.classList.add('correct');
+            score++;
+            scoreDisplay.innerText = `Score: ${score}`;
+        } else {
+            btnElement.classList.add('wrong');
+            allOptions[correctIndex].classList.add('correct'); // Show correct answer
+        }
+
+        // Show Explanation
+        expText.innerText = q.explanation;
+        expDetail.innerText = q.detail;
+        expExample.innerText = `例：${q.example}`;
+        explanationArea.style.display = 'block';
+
+        nextBtn.style.display = 'block';
+        
+        // Scroll to explanation on mobile
+        explanationArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentQuestions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'block';
+        
+        const percentage = Math.round((score / currentQuestions.length) * 100);
+        document.getElementById('final-score').innerText = `${score}`;
+        
+        let msg = "";
+        if (percentage === 100) msg = "完璧！太厲害了！";
+        else if (percentage >= 80) msg = "很棒！繼續保持！";
+        else if (percentage >= 60) msg = "及格了，再接再厲！";
+        else msg = "加油，多複習幾次吧！";
+        
+        document.getElementById('result-message').innerText = `${msg} (正解率 ${percentage}%)`;
+    }
+
+    function goHome() {
+        resultScreen.style.display = 'none';
+        menuScreen.style.display = 'flex';
+        renderMenu();
+    }
+</script>
+
+</body>
+</html>
